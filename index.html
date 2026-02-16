@@ -2,61 +2,44 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Star Trek: Ultimate Challenge LCARS Edition</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Star Trek: Ultimate Challenge LCARS</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
 <style>
-body {
-    margin:0; font-family:'Orbitron', sans-serif;
-    background:black; color:#00ffff; overflow-x:hidden;
-}
-.screen { display:none; padding:20px; }
+body { margin:0; font-family:'Orbitron', sans-serif; background:black; color:#00ffff; overflow-x:hidden; }
+.screen { display:none; padding:15px; }
 .active { display:block; }
-h1,h2 { text-transform:uppercase; letter-spacing:2px; }
-button {
-    padding:12px 20px; margin:8px;
-    font-size:16px; text-transform:uppercase;
-    border:none; cursor:pointer; border-radius:4px;
-}
-#answers button { width:90%; display:block; margin:10px auto; }
+h1,h2 { text-transform:uppercase; letter-spacing:1px; text-align:center; }
+button { padding:14px; margin:8px 0; font-size:18px; text-transform:uppercase; border:none; cursor:pointer; border-radius:6px; width:100%; box-sizing:border-box; }
 #answers button.correct { background:#00ff00; color:black; }
 #answers button.incorrect { background:#ff0000; color:white; }
-input { padding:12px; font-size:18px; width:80px; text-align:center; text-transform:uppercase; }
-.progress-container { width:80%; margin:15px auto; background:#222; border:2px solid #00ffff; border-radius:5px; }
-.progress-bar { height:20px; width:0%; background:#00ffff; border-radius:3px; transition:0.2s;}
-.fanfare { font-size:32px; color:gold; animation:flash 1s infinite; text-align:center;}
+input { padding:12px; font-size:20px; width:60%; text-align:center; text-transform:uppercase; display:block; margin:10px auto; border-radius:6px; border:none; }
+.progress-container { width:95%; margin:12px auto; background:#222; border:2px solid #00ffff; border-radius:6px; height:20px; }
+.progress-bar { height:100%; width:0%; background:#00ffff; border-radius:3px; transition:0.2s;}
+.fanfare { font-size:28px; color:gold; animation:flash 1s infinite; text-align:center;}
 @keyframes flash {0%,50%,100%{color:gold;}25%,75%{color:#fff;}}
-.lcars-panel { border:4px solid #00ffff; padding:20px; margin:10px auto; border-radius:15px; background:rgba(0,0,0,0.6);}
-body::before {
-    content:""; position:fixed; top:0; left:0; width:100%; height:100%;
-    background:url('https://i.imgur.com/hcGB6QZ.gif') center/cover no-repeat; 
-    opacity:0.2; z-index:-1;
-}
+.lcars-panel { border:4px solid #00ffff; padding:15px; margin:10px auto; border-radius:12px; background:rgba(0,0,0,0.7);}
+body::before { content:""; position:fixed; top:0; left:0; width:100%; height:100%; background:url('https://i.imgur.com/hcGB6QZ.gif') center/cover no-repeat; opacity:0.15; z-index:-1; }
+@media (max-width: 480px) { h1,h2 { font-size:20px; } button { font-size:16px; padding:12px; } .fanfare { font-size:24px; } input { font-size:18px; width:70%; } }
 </style>
 </head>
 <body>
 
-<!-- INTRO -->
 <div id="intro" class="screen active lcars-panel">
     <h1>STAR TREK: ULTIMATE CHALLENGE</h1>
-    <p>50 expert-level questions spanning all Star Trek eras.<br>
-    Score ≥80% = STARFLEET MASTER!</p>
+    <p style="text-align:center;">50 expert-level questions spanning all Star Trek eras.<br>Score ≥80% = STARFLEET MASTER!</p>
     <input id="initials" maxlength="3" placeholder="ABC">
-    <br><br>
     <button onclick="startQuiz()">ENGAGE</button>
 </div>
 
-<!-- QUIZ -->
 <div id="quiz" class="screen lcars-panel">
+    <div class="progress-container"><div id="timer-bar" class="progress-bar" style="background:#ff9900;"></div></div>
     <h2 id="question"></h2>
     <div id="answers"></div>
     <div class="progress-container"><div id="progress" class="progress-bar"></div></div>
-    <p id="scoreDisplay"></p>
-    <div class="progress-container">
-        <div id="timer-bar" class="progress-bar" style="background:#ff9900;"></div>
-    </div>
+    <p id="scoreDisplay" style="text-align:center;"></p>
 </div>
 
-<!-- RESULT -->
 <div id="result" class="screen lcars-panel">
     <h1>MISSION COMPLETE</h1>
     <p id="finalScore"></p>
@@ -69,77 +52,77 @@ body::before {
 </div>
 
 <script>
-// --- QUIZ DATA (50 HARD-CODED QUESTIONS) ---
+// --- 50 Expert-Level Star Trek Questions ---
 const quizData = [
+// 1–10 Easy/Classic
 {question:"Which starship is commanded by Captain James T. Kirk?",answers:["USS Enterprise","USS Voyager","USS Defiant","USS Discovery"],correct:0},
 {question:"What is the name of Spock’s home planet?",answers:["Vulcan","Romulus","Qo'noS","Andoria"],correct:0},
 {question:"Which captain leads the USS Enterprise-D?",answers:["Jean-Luc Picard","James T. Kirk","Jonathan Archer","Christopher Pike"],correct:0},
-{question:"What is the primary mission of Starfleet in The Original Series?",answers:["Explore new worlds","Conquer planets","Trade routes","Military domination"],correct:0},
-{question:"Which series introduced the Maquis as a recurring element?",answers:["Deep Space Nine","TOS","Enterprise","Voyager"],correct:0},
-{question:"Who is the chief medical officer aboard Deep Space Nine for most of the series?",answers:["Dr. Julian Bashir","Dr. McCoy","Dr. Crusher","Dr. Phlox"],correct:0},
-{question:"Which species is known for strict adherence to logic?",answers:["Vulcans","Klingons","Romulans","Cardassians"],correct:0},
-{question:"Borg cube attempts to assimilate which planet in First Contact?",answers:["Earth","Vulcan","Qo'noS","Romulus"],correct:0},
-{question:"Which officer famously says 'Make it so'?",answers:["Jean-Luc Picard","James T. Kirk","Benjamin Sisko","Jonathan Archer"],correct:0},
+{question:"Who says 'Make it so'?",answers:["Jean-Luc Picard","James T. Kirk","Benjamin Sisko","Jonathan Archer"],correct:0},
+{question:"Which species is known for strict logic and emotion suppression?",answers:["Vulcans","Klingons","Romulans","Cardassians"],correct:0},
 {question:"Which ship is stranded in the Delta Quadrant?",answers:["USS Voyager","USS Enterprise","USS Defiant","USS Discovery"],correct:0},
+{question:"Who is DS9’s chief medical officer?",answers:["Julian Bashir","Bashir Jr.","McCoy","Phlox"],correct:0},
+{question:"Which series introduced the Maquis?",answers:["DS9","TOS","Enterprise","Voyager"],correct:0},
+{question:"Borg cube attempts to assimilate which planet?",answers:["Earth","Vulcan","Qo'noS","Romulus"],correct:0},
+{question:"Primary mission of Starfleet in TOS?",answers:["Explore new worlds","Conquer planets","Trade routes","Military domination"],correct:0},
 
-// 11–50: EXPERT QUESTIONS
-{question:"Which series follows Jean-Luc Picard decades after Nemesis?",answers:["Star Trek: Picard","TNG","DS9","Voyager"],correct:0},
-{question:"Which captain commands the NX-01 Enterprise?",answers:["Jonathan Archer","Christopher Pike","James T. Kirk","Jean-Luc Picard"],correct:0},
-{question:"What event creates the Kelvin timeline in 2009?",answers:["Narada attacks USS Kelvin","Borg invasion","Temporal cold war","Romulan uprising"],correct:0},
-{question:"Who plays Spock in the Kelvin timeline films?",answers:["Zachary Quinto","Leonard Nimoy","Ethan Peck","Ben Cross"],correct:0},
-{question:"Which Klingon leader appears in Enterprise?",answers:["Kang","Koloth","Kor","Martok"],correct:0},
-{question:"Which series introduced the Temporal Cold War?",answers:["Enterprise","TOS","DS9","Voyager"],correct:0},
-{question:"Who portrays Captain Christopher Pike in Strange New Worlds?",answers:["Anson Mount","Jeffrey Hunter","Bruce Greenwood","Scott Bakula"],correct:0},
-{question:"Which animated series features USS Cerritos?",answers:["Lower Decks","Prodigy","TOS Animated","DS9 Animated"],correct:0},
+// 11–30 Moderate/Hard
+{question:"Which series follows Picard decades after Nemesis?",answers:["Picard","TNG","DS9","Voyager"],correct:0},
+{question:"Captain of NX-01 Enterprise?",answers:["Jonathan Archer","Christopher Pike","James T. Kirk","Jean-Luc Picard"],correct:0},
+{question:"Event creating the Kelvin timeline?",answers:["Narada attacks USS Kelvin","Borg invasion","Temporal cold war","Romulan uprising"],correct:0},
+{question:"Who plays Spock in Kelvin films?",answers:["Zachary Quinto","Leonard Nimoy","Ethan Peck","Ben Cross"],correct:0},
+{question:"Klingon leader appearing in Enterprise?",answers:["Kang","Koloth","Kor","Martok"],correct:0},
+{question:"Series introducing the Temporal Cold War?",answers:["Enterprise","TOS","DS9","Voyager"],correct:0},
+{question:"Captain Christopher Pike actor in Strange New Worlds?",answers:["Anson Mount","Jeffrey Hunter","Bruce Greenwood","Scott Bakula"],correct:0},
+{question:"Animated series featuring USS Cerritos?",answers:["Lower Decks","Prodigy","TOS Animated","DS9 Animated"],correct:0},
 {question:"Which android was created by Dr. Noonien Soong?",answers:["Data","Lore","B-4","Juliana"],correct:0},
-{question:"Which series jumps forward to the 32nd century?",answers:["Discovery Season 3","Picard","TNG","Enterprise"],correct:0},
-{question:"What is the Klingon homeworld called?",answers:["Qo'noS","Vulcan","Romulus","Cardassia"],correct:0},
-{question:"Which device allows instantaneous travel across space?",answers:["Transporter","Warp Drive","Slipstream","Holodeck"],correct:0},
-{question:"Which adversary assimilates species?",answers:["Borg","Klingons","Cardassians","Romulans"],correct:0},
-{question:"What is the Federation capital commonly called?",answers:["Starfleet Headquarters","San Francisco","Earth Prime","United Federation Council"],correct:0},
-{question:"Which Bajoran entity is a neural parasite?",answers:["Pah-wraith","Prophet","Q","Guardian"],correct:0},
-{question:"What is the Romulan home planet?",answers:["Romulus","Remus","Qo'noS","Vulcan"],correct:0},
-{question:"Which tech heals injuries aboard starships?",answers:["Medical tricorder","Warp coil","Deflector dish","Replicator"],correct:0},
-{question:"Which species created the Iconian gateways?",answers:["Iconians","Vulcans","Klingons","Romulans"],correct:0},
-{question:"What treaty ended the Earth-Romulan War?",answers:["Treaty of Algeron","Khitomer Accords","Rihannsu Pact","Peace of Betazed"],correct:0},
-{question:"Which Starfleet rank uses pips on the collar?",answers:["TNG officers","Klingons","Romulans","Bajorans"],correct:0},
-{question:"Which was first produced for streaming?",answers:["Discovery","Picard","Lower Decks","Prodigy"],correct:0},
-{question:"Who from TNG recurs in Picard?",answers:["Riker","Data","Geordi","Worf"],correct:0},
-{question:"Which series premiered on Paramount+ targeting adults?",answers:["Lower Decks","Prodigy","TNG Animated","DS9"],correct:0},
-{question:"Which ship is primary in Lower Decks?",answers:["USS Cerritos","USS Voyager","USS Enterprise-D","USS Discovery"],correct:0},
-{question:"Which series explores Pike’s early adventures?",answers:["Strange New Worlds","TOS","TNG","Enterprise"],correct:0},
-{question:"Which admiral is key in Picard season 1?",answers:["Admiral Oh","Admiral Clancy","Admiral Janeway","Admiral Riker"],correct:0},
-{question:"Which series focuses on synthetic life?",answers:["Picard","TNG","Voyager","Discovery"],correct:0},
-{question:"Which modern series reintroduces Seven of Nine?",answers:["Picard","Voyager","TNG","Discovery"],correct:0},
-{question:"Which series features USS Protostar?",answers:["Prodigy","Discovery","Lower Decks","Enterprise"],correct:0},
-{question:"Which recent series has young cadets learning Starfleet?",answers:["Prodigy","Lower Decks","Discovery","Enterprise"],correct:0},
-{question:"Which officer leads Enterprise in Strange New Worlds?",answers:["Christopher Pike","James Kirk","Jonathan Archer","Jean-Luc Picard"],correct:0},
-{question:"Which animated Star Trek focuses on youth training?",answers:["Prodigy","Lower Decks","Enterprise","TOS Animated"],correct:0},
-{question:"Which species is famous for cloaking devices?",answers:["Romulans","Klingons","Vulcans","Bajorans"],correct:0},
-{question:"Which ship uses transwarp corridors in lore?",answers:["USS Excelsior","USS Defiant","USS Voyager","USS Enterprise"],correct:0},
-{question:"Who commands the Kelvin timeline Enterprise crew?",answers:["James Kirk","Spock","Hikaru Sulu","Scotty"],correct:0},
-{question:"Who is captain during TNG season 1?",answers:["Jean-Luc Picard","Wesley Crusher","Riker","Kirk"],correct:0},
-{question:"Which Bajoran station was home to Sisko?",answers:["Deep Space Nine","Terok Nor","Earth Station","Starbase 1"],correct:0},
-{question:"Which Star Trek series introduced Section 31?",answers:["DS9/Discovery","TOS","Voyager","Enterprise"],correct:0},
-{question:"Which captain is famous for the line 'Beam me up, Scotty'?",answers:["James Kirk","Jean-Luc Picard","Jonathan Archer","Benjamin Sisko"],correct:0},
-{question:"Which Federation vessel first visited the Delta Quadrant?",answers:["USS Voyager","USS Enterprise","USS Defiant","USS Kelvin"],correct:0},
-{question:"Who is the main protagonist in Star Trek: Enterprise?",answers:["Jonathan Archer","James Kirk","Jean-Luc Picard","Spock"],correct:0},
-{question:"Which ship is first in the Kelvin timeline films?",answers:["USS Kelvin","USS Enterprise","USS Excelsior","USS Discovery"],correct:0},
-{question:"Who is the science officer aboard TOS Enterprise?",answers:["Spock","Scotty","McCoy","Uhura"],correct:0},
-{question:"Which Star Trek series first depicted holographic doctors?",answers:["Voyager","TNG","DS9","Enterprise"],correct:0},
-{question:"Which captain is also a Starfleet instructor in Strange New Worlds?",answers:["Christopher Pike","Jean-Luc Picard","Jonathan Archer","James Kirk"],correct:0},
-{question:"Which alien race frequently uses cloaking devices?",answers:["Romulans","Klingons","Vulcans","Cardassians"],correct:0},
-{question:"Which ship did Seven of Nine join after Voyager?",answers:["USS Voyager","USS Enterprise","USS Discovery","USS Defiant"],correct:0},
-{question:"Which series features the Maquis conflict prominently?",answers:["DS9","TNG","TOS","Enterprise"],correct:0},
-{question:"Which crew member is a holographic doctor in Voyager?",answers:["EMH","Bashir","Crusher","Phlox"],correct:0},
-{question:"Which Starfleet vessel explores the Beta Quadrant?",answers:["USS Enterprise-D","USS Voyager","USS Defiant","USS Discovery"],correct:0},
-{question:"Which Star Trek ship has a golden saucer section?",answers:["USS Enterprise-D","USS Voyager","USS Kelvin","USS Discovery"],correct:0}
+{question:"Discovery season jumping to 32nd century?",answers:["Season 3","Season 1","Picard","Enterprise"],correct:0},
+{question:"Federation capital commonly called?",answers:["Starfleet Headquarters","San Francisco","Earth Prime","United Federation Council"],correct:0},
+{question:"Bajoran entity as neural parasite?",answers:["Pah-wraith","Prophet","Q","Guardian"],correct:0},
+{question:"Romulan home planet?",answers:["Romulus","Remus","Qo'noS","Vulcan"],correct:0},
+{question:"Technology used to heal aboard starships?",answers:["Medical tricorder","Warp coil","Deflector dish","Replicator"],correct:0},
+{question:"Species creating Iconian gateways?",answers:["Iconians","Vulcans","Klingons","Romulans"],correct:0},
+{question:"Treaty ending Earth-Romulan War?",answers:["Treaty of Algeron","Khitomer Accords","Rihannsu Pact","Peace of Betazed"],correct:0},
+{question:"Which Starfleet rank uses pips?",answers:["TNG officers","Klingons","Romulans","Bajorans"],correct:0},
+{question:"First series produced for streaming?",answers:["Discovery","Picard","Lower Decks","Prodigy"],correct:0},
+{question:"Which TNG character recurs in Picard?",answers:["Riker","Data","Geordi","Worf"],correct:0},
+{question:"Animated series for adults?",answers:["Lower Decks","Prodigy","TNG Animated","DS9"],correct:0},
+{question:"Primary ship in Lower Decks?",answers:["USS Cerritos","USS Voyager","USS Enterprise-D","USS Discovery"],correct:0},
+
+// 31–50 Expert/Obscure
+{question:"Series exploring Pike’s early adventures?",answers:["Strange New Worlds","TOS","TNG","Enterprise"],correct:0},
+{question:"Admiral key in Picard S1?",answers:["Admiral Oh","Admiral Clancy","Admiral Janeway","Admiral Riker"],correct:0},
+{question:"Series focusing on synthetic life?",answers:["Picard","TNG","Voyager","Discovery"],correct:0},
+{question:"Series reintroducing Seven of Nine?",answers:["Picard","Voyager","TNG","Discovery"],correct:0},
+{question:"Ship featured in Prodigy?",answers:["USS Protostar","USS Discovery","USS Cerritos","USS Enterprise"],correct:0},
+{question:"Series with cadets learning Starfleet?",answers:["Prodigy","Lower Decks","Discovery","Enterprise"],correct:0},
+{question:"Captain leading Enterprise in Strange New Worlds?",answers:["Christopher Pike","James Kirk","Jonathan Archer","Jean-Luc Picard"],correct:0},
+{question:"Animated Star Trek for youth training?",answers:["Prodigy","Lower Decks","Enterprise","TOS Animated"],correct:0},
+{question:"Species famous for cloaking devices?",answers:["Romulans","Klingons","Vulcans","Cardassians"],correct:0},
+{question:"Ship using transwarp corridors in lore?",answers:["USS Excelsior","USS Defiant","USS Voyager","USS Enterprise"],correct:0},
+{question:"Captain of Kelvin timeline Enterprise crew?",answers:["James Kirk","Spock","Hikaru Sulu","Scotty"],correct:0},
+{question:"Captain during TNG season 1?",answers:["Jean-Luc Picard","Wesley Crusher","Riker","Kirk"],correct:0},
+{question:"Bajoran station home to Sisko?",answers:["Deep Space Nine","Terok Nor","Earth Station","Starbase 1"],correct:0},
+{question:"Series introducing Section 31?",answers:["DS9/Discovery","TOS","Voyager","Enterprise"],correct:0},
+{question:"Captain famous for 'Beam me up, Scotty'?",answers:["James Kirk","Jean-Luc Picard","Jonathan Archer","Benjamin Sisko"],correct:0},
+{question:"First Federation vessel to explore Delta Quadrant?",answers:["USS Voyager","USS Enterprise","USS Defiant","USS Kelvin"],correct:0},
+{question:"Main protagonist in Star Trek: Enterprise?",answers:["Jonathan Archer","James Kirk","Jean-Luc Picard","Spock"],correct:0},
+{question:"First ship in Kelvin timeline films?",answers:["USS Kelvin","USS Enterprise","USS Excelsior","USS Discovery"],correct:0},
+{question:"Science officer aboard TOS Enterprise?",answers:["Spock","Scotty","McCoy","Uhura"],correct:0},
+{question:"First depiction of holographic doctors?",answers:["Voyager","TNG","DS9","Enterprise"],correct:0},
+{question:"Captain as instructor in Strange New Worlds?",answers:["Christopher Pike","Jean-Luc Picard","Jonathan Archer","James Kirk"],correct:0},
+{question:"Alien race using cloaking devices frequently?",answers:["Romulans","Klingons","Vulcans","Cardassians"],correct:0},
+{question:"Seven of Nine joins after Voyager?",answers:["USS Voyager","USS Enterprise","USS Discovery","USS Defiant"],correct:0},
+{question:"Series featuring Maquis conflict prominently?",answers:["DS9","TNG","TOS","Enterprise"],correct:0},
+{question:"Crew member is holographic doctor in Voyager?",answers:["EMH","Bashir","Crusher","Phlox"],correct:0},
+{question:"Federation vessel exploring Beta Quadrant?",answers:["USS Enterprise-D","USS Voyager","USS Defiant","USS Discovery"],correct:0},
+{question:"Star Trek ship with golden saucer section?",answers:["USS Enterprise-D","USS Voyager","USS Kelvin","USS Discovery"],correct:0}
 ];
 
-// --- STATE ---
+// --- State ---
 let currentQuestion=0, score=0, playerInitials="", timer, timeLeft=20, streak=0;
 
-// --- FUNCTIONS ---
+// --- Functions ---
 function startQuiz(){
     const input=document.getElementById("initials").value.trim().toUpperCase();
     if(!/^[A-Z]{2,3}$/.test(input)){alert("Enter 2–3 letters."); return;}
@@ -158,8 +141,7 @@ function loadQuestion(){
     timeLeft=20; updateTimer();
     const q=quizData[currentQuestion];
     document.getElementById("question").textContent=q.question;
-    const answersDiv=document.getElementById("answers");
-    answersDiv.innerHTML="";
+    const answersDiv=document.getElementById("answers"); answersDiv.innerHTML="";
     q.answers.forEach((answer,index)=>{
         const btn=document.createElement("button");
         btn.textContent=answer;
@@ -196,19 +178,18 @@ function checkAnswer(index){
         currentQuestion++;
         if(currentQuestion<quizData.length) loadQuestion();
         else endQuiz();
-    },1000);
+    },800);
 }
 
 function updateProgress(){document.getElementById("progress").style.width=(currentQuestion/quizData.length*100)+"%";}
-function updateScore(){document.getElementById("scoreDisplay").textContent=`Score: ${score} / ${quizData.length}  Streak: ${streak}`;}
+function updateScore(){document.getElementById("scoreDisplay").textContent=`Score: ${score}/${quizData.length}  Streak: ${streak}`;}
 
 function endQuiz(){
     document.getElementById("quiz").classList.remove("active");
     document.getElementById("result").classList.add("active");
     const percent=Math.round((score/quizData.length)*100);
     document.getElementById("finalScore").textContent=`${playerInitials} scored ${score}/${quizData.length} (${percent}%)`;
-    if(percent>=80){document.getElementById("celebration").textContent="STARFLEET MASTER ACHIEVED";}
-    else document.getElementById("celebration").textContent="Keep training for Starfleet mastery!";
+    document.getElementById("celebration").textContent=(percent>=80)?"STARFLEET MASTER ACHIEVED":"Keep training for Starfleet mastery!";
     saveScore(playerInitials,percent);
     displayLeaderboard();
 }
