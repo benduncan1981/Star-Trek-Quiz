@@ -3,179 +3,299 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Star Trek Ultimate Quiz</title>
+<title>Star Trek Premium Quiz</title>
+
 <style>
 body {
-    margin: 0;
-    font-family: Arial, Helvetica, sans-serif;
-    background: black;
-    color: #fff;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
+    margin:0;
+    font-family:Arial, Helvetica, sans-serif;
+    background:black;
+    color:white;
+    overflow:hidden;
 }
+
+/* Animated starfield */
+body::before {
+    content:"";
+    position:fixed;
+    width:200%;
+    height:200%;
+    background:radial-gradient(white 1px, transparent 1px);
+    background-size:3px 3px;
+    animation:stars 60s linear infinite;
+    opacity:0.2;
+}
+@keyframes stars {
+    from { transform:translateY(0); }
+    to { transform:translateY(-1000px); }
+}
+
 #app {
-    width: 95%;
-    max-width: 900px;
-    background: #111;
-    border-radius: 20px;
-    padding: 20px;
-    box-shadow: 0 0 25px #ff9900;
+    position:relative;
+    z-index:2;
+    width:95%;
+    max-width:900px;
+    margin:20px auto;
+    background:#111;
+    border-radius:25px;
+    padding:20px;
+    box-shadow:0 0 30px #ff9900;
 }
+
 h1 {
-    text-align: center;
-    color: #ff9900;
+    text-align:center;
+    color:#ff9900;
+    margin-top:0;
 }
+
+#topBar {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:10px;
+    font-size:0.9rem;
+}
+
+#timer {
+    font-weight:bold;
+    color:#00ccff;
+}
+
 #progressBar {
-    width: 100%;
-    height: 10px;
-    background: #333;
-    border-radius: 5px;
-    margin-bottom: 20px;
+    width:100%;
+    height:8px;
+    background:#333;
+    border-radius:4px;
+    margin-bottom:15px;
 }
 #progress {
-    height: 10px;
-    width: 0%;
-    background: #ff9900;
-    border-radius: 5px;
-    transition: width 0.4s ease;
+    height:8px;
+    width:0%;
+    background:#ff9900;
+    border-radius:4px;
+    transition:width 0.3s ease;
 }
+
 .question {
-    font-size: 1.2rem;
-    margin-bottom: 20px;
+    font-size:1.1rem;
+    margin-bottom:15px;
 }
+
 .btn {
-    display: block;
-    width: 100%;
-    padding: 12px;
-    margin: 10px 0;
-    border: none;
-    border-radius: 10px;
-    background: #222;
-    color: #fff;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
+    width:100%;
+    padding:12px;
+    margin:8px 0;
+    border:none;
+    border-radius:12px;
+    background:#222;
+    color:white;
+    font-size:1rem;
+    cursor:pointer;
+    transition:all 0.2s ease;
 }
-.btn:hover {
-    background: #ff9900;
-    color: black;
-}
-.correct {
-    background: #2ecc71 !important;
-    color: black;
-}
-.wrong {
-    background: #e74c3c !important;
-    color: white;
-}
-#scoreDisplay {
-    text-align: right;
-    margin-bottom: 10px;
-    color: #ff9900;
-}
-#resultScreen {
-    text-align: center;
+.btn:hover { background:#ff9900; color:black; }
+
+.correct { background:#2ecc71 !important; color:black; }
+.wrong { background:#e74c3c !important; }
+
+#result {
+    text-align:center;
 }
 </style>
 </head>
 <body>
+
 <div id="app">
-<h1>Star Trek Ultimate Quiz</h1>
-<div id="scoreDisplay">Score: 0</div>
+<h1>Star Trek Premium Quiz</h1>
+
+<div id="topBar">
+<div id="score">Score: 0</div>
+<div id="questionCount">Question 1 / 50</div>
+<div id="timer">Time: 15</div>
+</div>
+
 <div id="progressBar"><div id="progress"></div></div>
-<div id="quizContainer"></div>
+<div id="quiz"></div>
+
 </div>
 
 <script>
+
+/* ----------- QUESTIONS ----------- */
+
 const quizData = [
 {q:"Which starship is commanded by Captain James T. Kirk?",a:["USS Enterprise NCC-1701","USS Voyager","USS Discovery","USS Defiant"],c:0},
-{q:"What is Spock’s home planet?",a:["Romulus","Qo'noS","Vulcan","Andoria"],c:2},
-{q:"Who commands the Enterprise-D?",a:["Kirk","Sisko","Picard","Janeway"],c:2},
-{q:"Which series introduced the Maquis?",a:["Voyager","Deep Space Nine","Enterprise","Discovery"],c:1},
-{q:"Which ship is stranded in the Delta Quadrant?",a:["Voyager","Defiant","Discovery","Reliant"],c:0},
-{q:"Who commands the NX-01?",a:["Archer","Pike","Kirk","Burnham"],c:0},
-{q:"Which film features Nero?",a:["Star Trek (2009)","Into Darkness","Beyond","First Contact"],c:0},
-{q:"Which series jumps to the 32nd century?",a:["Picard","Discovery","Lower Decks","Prodigy"],c:1},
-{q:"Which species is the cybernetic collective?",a:["Borg","Dominion","Cardassians","Ferengi"],c:0},
-{q:"What is the Klingon homeworld?",a:["Vulcan","Romulus","Qo'noS","Bajor"],c:2},
-{q:"Which captain says 'Make it so'?",a:["Kirk","Janeway","Sisko","Picard"],c:3},
-{q:"Which animated series follows USS Cerritos?",a:["Prodigy","Lower Decks","Discovery","Enterprise"],c:1},
-{q:"Who is the android in TNG?",a:["Data","B-4","Lore","Soong"],c:0},
-{q:"Which series follows Jean-Luc Picard later in life?",a:["Discovery","Picard","Enterprise","Strange New Worlds"],c:1},
-{q:"Which ship does Archer command?",a:["NX-01","Defiant","Voyager","Reliant"],c:0},
-{q:"What is Romulan homeworld?",a:["Romulus","Vulcan","Qo'noS","Bajor"],c:0},
-{q:"Which show centres on Pike and Number One?",a:["Discovery","Strange New Worlds","Picard","Enterprise"],c:1},
-{q:"Which series targets younger audiences with Protostar?",a:["Prodigy","Lower Decks","Discovery","Picard"],c:0},
-{q:"Which organisation is Section 31?",a:["Medical","Clandestine","Engineering","Diplomatic"],c:1},
-{q:"Which species values logic above emotion?",a:["Vulcans","Romulans","Klingons","Bajorans"],c:0}
+{q:"Spock’s home planet?",a:["Romulus","Qo'noS","Vulcan","Andoria"],c:2},
+{q:"Captain of Enterprise-D?",a:["Sisko","Picard","Kirk","Janeway"],c:1},
+{q:"Ship stranded in Delta Quadrant?",a:["Voyager","Reliant","Defiant","Discovery"],c:0},
+{q:"Klingon homeworld?",a:["Romulus","Vulcan","Qo'noS","Cardassia"],c:2},
+{q:"Who says 'Make it so'?",a:["Kirk","Picard","Archer","Sisko"],c:1},
+{q:"NX-01 captain?",a:["Archer","Pike","Burnham","Lorca"],c:0},
+{q:"Villain in 2009 film?",a:["Khan","Nero","Shinzon","Krall"],c:1},
+{q:"Cybernetic collective?",a:["Dominion","Borg","Ferengi","Cardassians"],c:1},
+{q:"Romulan homeworld?",a:["Vulcan","Romulus","Bajor","Andoria"],c:1},
+{q:"Android in TNG?",a:["Lore","Data","B-4","Soong"],c:1},
+{q:"Series set in 32nd century?",a:["Discovery","Picard","Prodigy","Lower Decks"],c:0},
+{q:"USS Cerritos appears in?",a:["Prodigy","Discovery","Lower Decks","Enterprise"],c:2},
+{q:"Pike led which ship?",a:["Enterprise","Voyager","Reliant","Defiant"],c:0},
+{q:"Which show follows Picard later?",a:["Picard","Discovery","SNW","Enterprise"],c:0},
+{q:"Protostar appears in?",a:["Prodigy","Lower Decks","Picard","Discovery"],c:0},
+{q:"Section 31 is?",a:["Medical unit","Secret intelligence","Engineering corps","Diplomatic branch"],c:1},
+{q:"Maquis introduced in?",a:["Voyager","DS9","Enterprise","Discovery"],c:1},
+{q:"Chief medical officer DS9?",a:["Crusher","Bashir","EMH","Phlox"],c:1},
+{q:"Enterprise-D registry?",a:["NCC-1701-A","NCC-1701-D","NX-01","NCC-74656"],c:1},
+{q:"Captain Janeway commands?",a:["Voyager","Defiant","Discovery","Enterprise"],c:0},
+{q:"Kelvin timeline caused by?",a:["Borg","Narada incursion","Temporal war","Q"],c:1},
+{q:"Actor playing Pike in SNW?",a:["Chris Pine","Anson Mount","Zachary Quinto","Karl Urban"],c:1},
+{q:"Discovery season jump forward?",a:["Season 2","Season 3","Season 1","Season 4"],c:1},
+{q:"TNG rank shown using?",a:["Sleeve stripes","Collar pips","Shoulder pads","Chest badge"],c:1},
+{q:"Warp drive enables?",a:["Teleportation","FTL travel","Time travel","Cloaking"],c:1},
+{q:"Transporter does?",a:["FTL","Matter relocation","Warp jump","Shielding"],c:1},
+{q:"Bajorans worship?",a:["Founders","Prophets","Iconians","Q"],c:1},
+{q:"Iconians known for?",a:["Cloaks","Gateways","Warp 10","Transwarp hubs"],c:1},
+{q:"Treaty of Algeron deals with?",a:["Borg peace","Romulan relations","Dominion war","Klingon alliance"],c:1},
+{q:"Enterprise prequel series?",a:["Discovery","Enterprise","Picard","SNW"],c:1},
+{q:"Captain Lorca appears in?",a:["Discovery","Voyager","DS9","Picard"],c:0},
+{q:"William Riker appears in?",a:["Enterprise","Picard","Discovery","Prodigy"],c:1},
+{q:"Seven of Nine returns in?",a:["Discovery","Picard","SNW","Lower Decks"],c:1},
+{q:"Lower Decks is?",a:["Live action","Adult animated","Kids show","Film series"],c:1},
+{q:"Prodigy targets?",a:["Adults","Young audiences","Klingons","Romulans"],c:1},
+{q:"Discovery first streamed on?",a:["BBC","CBS All Access","Netflix UK first","Sky"],c:1},
+{q:"Burnham first served under?",a:["Picard","Lorca","Pike","Archer"],c:1},
+{q:"Archer era is which century?",a:["24th","23rd","22nd","25th"],c:2},
+{q:"First Contact features?",a:["Dominion","Borg","Romulans","Q"],c:1},
+{q:"Enterprise-E captain?",a:["Picard","Sisko","Janeway","Kirk"],c:0},
+{q:"DS9 station orbits?",a:["Cardassia","Bajor","Earth","Romulus"],c:1},
+{q:"Founder species lead?",a:["Borg","Dominion","Klingons","Ferengi"],c:1},
+{q:"Cardassian space station originally named?",a:["Terok Nor","Deep Core","Starbase 1","Outpost 12"],c:0},
+{q:"Khan appears originally in?",a:["TNG","TOS","DS9","Voyager"],c:1},
+{q:"Mirror Universe introduced in?",a:["Voyager","TOS","Enterprise","Discovery"],c:1},
+{q:"Captain Sisko commands?",a:["Enterprise","Defiant","Voyager","Discovery"],c:1},
+{q:"Phlox serves on?",a:["Voyager","Enterprise NX-01","Discovery","Reliant"],c:1},
+{q:"Shinzon appears in?",a:["Nemesis","First Contact","Insurrection","Generations"],c:0},
+{q:"Strange New Worlds focuses on?",a:["Picard era","Pike era","Kelvin films","Borg future"],c:1}
 ];
 
-// duplicate to reach 50
-while(quizData.length < 50){
-    quizData.push({...quizData[quizData.length % 20]});
+/* ----------- LOGIC ----------- */
+
+let current=0;
+let score=0;
+let timerInterval;
+let timeLeft=15;
+
+const quiz=document.getElementById("quiz");
+const scoreDisplay=document.getElementById("score");
+const questionCount=document.getElementById("questionCount");
+const progress=document.getElementById("progress");
+const timerDisplay=document.getElementById("timer");
+
+/* Shuffle questions */
+quizData.sort(()=>Math.random()-0.5);
+
+function startTimer(){
+    timeLeft=15;
+    timerDisplay.textContent="Time: "+timeLeft;
+    timerInterval=setInterval(()=>{
+        timeLeft--;
+        timerDisplay.textContent="Time: "+timeLeft;
+        if(timeLeft<=0){
+            clearInterval(timerInterval);
+            nextQuestion();
+        }
+    },1000);
 }
-
-let current = 0;
-let score = 0;
-
-const container = document.getElementById("quizContainer");
-const progress = document.getElementById("progress");
-const scoreDisplay = document.getElementById("scoreDisplay");
 
 function loadQuestion(){
-    if(current >= quizData.length){
-        showResult();
+    if(current>=quizData.length){
+        endQuiz();
         return;
     }
-    const qData = quizData[current];
-    container.innerHTML = `<div class="question">${current+1}. ${qData.q}</div>`;
-    qData.a.forEach((option,index)=>{
-        const btn = document.createElement("button");
-        btn.classList.add("btn");
-        btn.innerText = option;
-        btn.onclick = ()=>checkAnswer(index);
-        container.appendChild(btn);
+
+    const q=quizData[current];
+    questionCount.textContent=`Question ${current+1} / 50`;
+    progress.style.width=((current/50)*100)+"%";
+
+    quiz.innerHTML=`<div class="question">${q.q}</div>`;
+    q.a.forEach((option,i)=>{
+        const btn=document.createElement("button");
+        btn.className="btn";
+        btn.textContent=option;
+        btn.onclick=()=>checkAnswer(i,btn);
+        quiz.appendChild(btn);
     });
-    progress.style.width = ((current/quizData.length)*100)+"%";
+
+    startTimer();
 }
 
-function checkAnswer(index){
-    const buttons = document.querySelectorAll(".btn");
-    const correct = quizData[current].c;
-    if(index === correct){
+function checkAnswer(index,btn){
+    clearInterval(timerInterval);
+    const correct=quizData[current].c;
+    const buttons=document.querySelectorAll(".btn");
+
+    if(index===correct){
         score++;
-        buttons[index].classList.add("correct");
+        btn.classList.add("correct");
+        beep();
     } else {
-        buttons[index].classList.add("wrong");
+        btn.classList.add("wrong");
         buttons[correct].classList.add("correct");
+        alertBeep();
     }
-    scoreDisplay.innerText = "Score: "+score;
-    setTimeout(()=>{
-        current++;
-        loadQuestion();
-    },800);
+
+    scoreDisplay.textContent="Score: "+score;
+
+    setTimeout(nextQuestion,800);
 }
 
-function showResult(){
+function nextQuestion(){
+    current++;
+    loadQuestion();
+}
+
+function endQuiz(){
     progress.style.width="100%";
-    let rank;
-    if(score >=45) rank="Fleet Admiral";
-    else if(score >=35) rank="Captain";
-    else if(score >=25) rank="Commander";
-    else rank="Ensign";
-    container.innerHTML = `
-        <div id="resultScreen">
-        <h2>Quiz Complete</h2>
-        <p>Your Score: ${score}/50</p>
-        <h3>Rank Achieved: ${rank}</h3>
-        <button class="btn" onclick="location.reload()">Restart Mission</button>
-        </div>
-    `;
+    let rank="Ensign";
+    if(score>=45) rank="Fleet Admiral";
+    else if(score>=35) rank="Captain";
+    else if(score>=25) rank="Commander";
+
+    const highScore=localStorage.getItem("trekHighScore")||0;
+    if(score>highScore){
+        localStorage.setItem("trekHighScore",score);
+    }
+
+    quiz.innerHTML=`
+    <div id="result">
+    <h2>Mission Complete</h2>
+    <p>Final Score: ${score} / 50</p>
+    <p>Rank Achieved: ${rank}</p>
+    <p>High Score: ${localStorage.getItem("trekHighScore")}</p>
+    <button class="btn" onclick="location.reload()">Restart</button>
+    </div>`;
+}
+
+/* Simple Web Audio beeps */
+
+function beep(){
+    const ctx=new (window.AudioContext||window.webkitAudioContext)();
+    const osc=ctx.createOscillator();
+    osc.frequency.value=600;
+    osc.connect(ctx.destination);
+    osc.start();
+    setTimeout(()=>osc.stop(),100);
+}
+
+function alertBeep(){
+    const ctx=new (window.AudioContext||window.webkitAudioContext)();
+    const osc=ctx.createOscillator();
+    osc.frequency.value=200;
+    osc.connect(ctx.destination);
+    osc.start();
+    setTimeout(()=>osc.stop(),200);
 }
 
 loadQuestion();
+
 </script>
 </body>
 </html>
